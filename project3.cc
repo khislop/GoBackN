@@ -31,7 +31,7 @@ int timerNum = 0;
 void A_output(struct msg message)
 {
     std::cout << "A side has recieved a message from the application that should be sent to side B: " << message.data << std::endl;
-    std::cout << "Sequence num = " << aNum << std::endl;
+    //std::cout << "Sequence num = " << aNum << std::endl;
     
     //Add message to the buffer
     snprintf(data[aNum], 20, "%s", message.data);
@@ -83,7 +83,7 @@ void A_input(struct pkt packet)
     if(packet.acknum > aAckedNum){
 	    aAckedNum = packet.acknum;
 	    aReAckNum = 0;
-	    std::cout << "Acked new message, ";
+	    //std::cout << "Acked new message, ";
 	    
 	    //Stop timer and restart it if there are still messages in flight
 	    simulation->stoptimer(A);
@@ -93,10 +93,10 @@ void A_input(struct pkt packet)
     }else{
         aReAckNum += 1;
         reAck = packet.acknum;
-        std::cout << "ReAcked old message, ";
+        //std::cout << "ReAcked old message, ";
     }
-    std::cout << "Current Acked package: " << aAckedNum << std::endl;
-    std::cout << "Current Number of ReAcked packages: " << aReAckNum << std::endl;
+    //std::cout << "Current Acked package: " << aAckedNum << std::endl;
+    //std::cout << "Current Number of ReAcked packages: " << aReAckNum << std::endl;
     
     if(aReAckNum > 3){
         //Go back N and resend all the data up to that point
@@ -154,7 +154,7 @@ void B_input(struct pkt packet)
     
     //Check if packet checksum matches. If not return a NACK (prentend it was lost) and return.
     if(csum != packet.checksum){
-        std::cout << "OH SHIIIIIIIIIIIIIIIIIIIIIIIITTTTTTTTTTTTTTTTTTTTTTTT" << std::endl;
+        //std::cout << "Checksum Failed" << std::endl;
         packet2.seqnum = 0;
         packet2.acknum = bRNum;
         packet2.checksum = 0;
