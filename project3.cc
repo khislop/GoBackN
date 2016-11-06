@@ -18,7 +18,7 @@ simulator *simulation;
 
 int timer = 500;
 
-char data[500][20];
+char data[50000][20];
 
 int aNum = 0;
 //int bAckNum = 0;
@@ -36,11 +36,18 @@ void A_output(struct msg message)
     //Add message to the buffer
     snprintf(data[aNum], 20, "%s", message.data);
     
+    //Create checksum
+    int csum = 0;
+    for(int i = 0; i < 20; i++){
+        csum += data[aNum][i];
+        //std::cout << "Checksum = " << csum << std::endl;
+    }
+    
     //Create the packet
     pkt packet;
     packet.seqnum = aNum;
     packet.acknum = 0;
-    packet.checksum = 0;
+    packet.checksum = csum;
     snprintf(packet.payload, 20, "%s", message.data);
     //snprintf(packet.payload, 20, "%s", data[aNum]);
 
@@ -137,6 +144,26 @@ void B_input(struct pkt packet)
 {
     std::cout << "B side has recieved a packet sent over the network from side A: " << packet.payload << std::endl;
     pkt packet2;
+    
+    //Create checksum
+    int csum = 0;
+    for(int i = 0; i < 20; i++){
+        csum += packet.payload[i];
+        //std::cout << "Checksum = " << csum << std::endl;
+    }
+    
+    //Check if packet checksum matches. If not return a NACK (prentend it was lost) and return.
+    if(csum != packet.checksum){
+        std::cout << "OH SHIIIIIIIIIIIIIIIIIIIIIIIITTTTTTTTTTTTTTTTTTTTTTTT" << std::endl;
+        packet2.seqnum = 0;
+        packet2.acknum = bRNum;
+        packet2.checksum = 0;
+        snprintf(packet2.payload, 5, "%s", "NACK");
+        simulation->tolayer3(B, packet2);
+        return;
+    }
+    
+    //If new message in order and not duplicate, ACK and pass up. Otherwise, NACK and throw away.
     if(packet.seqnum == bRNum){
         packet2.seqnum = 0;
         packet2.acknum = packet.seqnum + 1;
@@ -144,11 +171,13 @@ void B_input(struct pkt packet)
         snprintf(packet2.payload, 4, "%s", "ACK");
         simulation->tolayer3(B, packet2);
         bRNum += 1;
+        //Pass data up
+        simulation->tolayer5(B, packet.payload);
     }else{
         packet2.seqnum = 0;
         packet2.acknum = bRNum;
         packet2.checksum = 0;
-        snprintf(packet2.payload, 5, "%s", "NACK");
+        snprintf(packet2.payload, 5, "%s", "REACK");
         simulation->tolayer3(B, packet2);
 
     }
