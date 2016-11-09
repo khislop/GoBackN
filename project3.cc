@@ -1,4 +1,6 @@
 #include "project3.h"
+#include <string>
+#include <vector>
 
 /* ******************************************************************
  ALTERNATING BIT AND GO-BACK-N NETWORK EMULATOR: VERSION 1.1  J.F.Kurose
@@ -18,7 +20,8 @@ simulator *simulation;
 
 int timer = 500;
 
-char data[50000][20];
+//char data[5000][20];
+vector<string> datav;
 
 int aNum = 0;
 //int bAckNum = 0;
@@ -34,12 +37,17 @@ void A_output(struct msg message)
     //std::cout << "Sequence num = " << aNum << std::endl;
     
     //Add message to the buffer
-    snprintf(data[aNum], 20, "%s", message.data);
+    //snprintf(data[aNum], 20, "%s", message.data);
+    datav.push_back(string("0"));
+    datav[aNum] = string(message.data);
     
     //Create checksum
     int csum = 0;
+    char word[20];
+    string test;
     for(int i = 0; i < 20; i++){
-        csum += data[aNum][i];
+        //csum += data[aNum][i];
+        csum += (datav[aNum].c_str())[i];
         //std::cout << "Checksum = " << csum << std::endl;
     }
     
@@ -104,7 +112,8 @@ void A_input(struct pkt packet)
         aNum = reAck;
         for(int i = reAck; i < oldNum; i++){
             msg message;
-            snprintf(message.data, 20, "%s", data[i]);
+            //snprintf(message.data, 20, "%s", data[i]);
+            snprintf(message.data, 20, "%s", datav[i].c_str());
             A_output(message);
         }
         
@@ -123,12 +132,14 @@ void A_timerinterrupt()
     aNum = aAckedNum;
     for(int i = aAckedNum; i < oldNum; i++){
         msg message;
-        snprintf(message.data, 20, "%s", data[i]);
+        //snprintf(message.data, 20, "%s", data[i]);
+        snprintf(message.data, 20, "%s", datav[i].c_str());
         A_output(message);
     }
     
-    if(aAckedNum < aNum){
-	        simulation->starttimer(A, timer);
+    if(aAckedNum < aNum - 1){
+	    simulation->stoptimer(A);
+        simulation->starttimer(A, timer);
     }
 }  
 

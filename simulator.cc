@@ -29,7 +29,7 @@ OF THE DATA STRUCTURES BELOW.  If you're interested in how I designed
 the emulator, you're welcome to look at the code - but again, you should have
 to, and you defeinitely should not have to modify
 ******************************************************************/
-
+int numRec;
 simulator::simulator()
 {
   int i;
@@ -148,6 +148,7 @@ void simulator::go()
 
 terminate:
    printf(" Simulator terminated at time %f\n after sending %d msgs from layer5\n",kr_time,nsim);
+   printf(" Simulator terminated at time %f\n after receiving %d msgs from layer3\n",kr_time, numRec);
 }
 
 
@@ -380,5 +381,6 @@ void simulator::tolayer5(int AorB,char datasent[20])
         printf("%c",datasent[i]);
      printf("\n");
    }
+   numRec += 1;
   
 }

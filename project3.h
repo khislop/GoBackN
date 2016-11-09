@@ -6,6 +6,8 @@
 
 #include "simulator.h"
 
+using namespace std;
+
 // ***********************************************************
 // ** If you want to define other fucntions, put them here.
 // ***********************************************************
